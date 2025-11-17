@@ -88,7 +88,7 @@ export function EnrollmentWizard({
         toast.success('Rascunho carregado automaticamente')
       }
     }
-  }, [draftKey, isEditing])
+  }, [draftKey, isEditing, initialData])
 
   // Autosave do rascunho
   useEffect(() => {
@@ -349,7 +349,7 @@ export function EnrollmentWizard({
               <li>Seus dados são salvos automaticamente como rascunho</li>
               <li>Você pode voltar e editar informações anteriores</li>
               <li>Todos os campos marcados com * são obrigatórios</li>
-              <li>Use o botão "Salvar Rascunho" para garantir que não perca dados</li>
+              <li>Use o botão &quot;Salvar Rascunho&quot; para garantir que não perca dados</li>
             </ul>
           </div>
         </div>

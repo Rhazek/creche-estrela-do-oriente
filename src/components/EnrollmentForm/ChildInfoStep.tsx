@@ -106,12 +106,14 @@ export function ChildInfoStep({ data, onSubmit, onSaveDraft, onDataChange }: Chi
     }
   })
 
+  const temIrmaosNaCrecheWatched = watch('temIrmaosNaCreche')
+
   // Carregar alunos matriculados quando o checkbox for marcado
   useEffect(() => {
-    if (watch('temIrmaosNaCreche') && enrolledStudents.length === 0) {
+    if (temIrmaosNaCrecheWatched && enrolledStudents.length === 0) {
       loadEnrolledStudents()
     }
-  }, [watch('temIrmaosNaCreche')])
+  }, [temIrmaosNaCrecheWatched, enrolledStudents.length])
 
   const loadEnrolledStudents = async () => {
     setLoadingStudents(true)

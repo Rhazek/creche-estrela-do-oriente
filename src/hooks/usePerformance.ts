@@ -146,8 +146,8 @@ export function useLazyComponent<T>(
     try {
       setLoading(true);
       setError(null);
-      const module = await importFn();
-      setComponent(() => module.default);
+      const loadedModule = await importFn();
+      setComponent(() => (loadedModule as any).default);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -160,14 +160,20 @@ export function useLazyComponent<T>(
   }, [loadComponent]);
 
   if (loading) {
-    return fallback ? fallback : () => React.createElement('div', null, 'Carregando...');
+    if (fallback) return fallback as unknown as T
+
+    const LoadingComponent: React.FC = () => React.createElement('div', null, 'Carregando...')
+    LoadingComponent.displayName = 'UseLazyComponent_Loading'
+    return LoadingComponent as unknown as T
   }
 
   if (error) {
-    return () => React.createElement('div', null, `Erro ao carregar componente: ${error.message}`);
+    const ErrorComponent: React.FC = () => React.createElement('div', null, `Erro ao carregar componente: ${error.message}`)
+    ErrorComponent.displayName = 'UseLazyComponent_Error'
+    return ErrorComponent as unknown as T
   }
 
-  return Component;
+  return Component
 }
 
 // Hook para monitoramento de performance

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import RoleGuard from '@/components/RoleGuard';
@@ -33,11 +33,7 @@ export default function RematriculasPage() {
   });
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
 
-  useEffect(() => {
-    loadEnrollments();
-  }, [filters, selectedYear]);
-
-  const loadEnrollments = async () => {
+  const loadEnrollments = useCallback(async () => {
     try {
       setLoading(true);
       // Buscar todas as matrículas confirmadas
@@ -106,7 +102,11 @@ export default function RematriculasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, selectedYear]);
+
+  useEffect(() => {
+    loadEnrollments();
+  }, [loadEnrollments]);
 
   const handleFilterChange = (field: keyof EnrollmentFilters, value: string) => {
     setFilters(prev => {

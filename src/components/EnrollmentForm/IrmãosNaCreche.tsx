@@ -31,7 +31,7 @@ export function IrmaosNaCreche({ control, temIrmaosNaCreche }: IrmaosNaCrechePro
     if (temIrmaosNaCreche && enrolledStudents.length === 0) {
       loadEnrolledStudents()
     }
-  }, [temIrmaosNaCreche])
+  }, [temIrmaosNaCreche, enrolledStudents.length])
 
   const loadEnrolledStudents = async () => {
     setLoading(true)
@@ -117,7 +117,7 @@ export function IrmaosNaCreche({ control, temIrmaosNaCreche }: IrmaosNaCrechePro
 
       {fields.length === 0 && (
         <p className="text-sm text-gray-500">
-          Clique em "Adicionar Irmão" para vincular um irmão que já está matriculado na creche.
+          Clique em &quot;Adicionar Irmão&quot; para vincular um irmão que já está matriculado na creche.
         </p>
       )}
     </div>

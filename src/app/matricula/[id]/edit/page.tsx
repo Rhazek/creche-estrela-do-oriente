@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import AuthGuard from '@/components/AuthGuard'
@@ -29,11 +29,7 @@ export default function EditEnrollmentPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  useEffect(() => {
-    loadEnrollment()
-  }, [enrollmentId])
-
-  const loadEnrollment = async () => {
+  const loadEnrollment = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
@@ -57,7 +53,11 @@ export default function EditEnrollmentPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [enrollmentId])
+
+  useEffect(() => {
+    loadEnrollment()
+  }, [loadEnrollment])
 
   const convertFirestoreToFormData = (data: FirestoreEnrollment): Partial<EnrollmentFormData> => {
     return {

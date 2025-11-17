@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import AuthGuard from '@/components/AuthGuard';
@@ -67,11 +67,75 @@ export default function RelatoriosPage() {
     loadEnrollments();
   }, []);
 
+  const applyFilters = useCallback(() => {
+    if (!enrollments || enrollments.length === 0) return;
+    
+    let filtered = [...enrollments];
+
+    // Filtro por idade
+    if (debouncedFilters.idadeMin || debouncedFilters.idadeMax) {
+      filtered = filtered.filter(enrollment => {
+        const birthDate = new Date(enrollment.dataNascimento);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
+        
+        const minAge = debouncedFilters.idadeMin ? parseInt(debouncedFilters.idadeMin) : 0;
+        const maxAge = debouncedFilters.idadeMax ? parseInt(debouncedFilters.idadeMax) : 6;
+        
+        return actualAge >= minAge && actualAge <= maxAge;
+      });
+    }
+
+    // Filtro por raça/cor
+    if (debouncedFilters.racaCor) {
+      filtered = filtered.filter(enrollment => {
+        const raca = (enrollment.racaCor || enrollment.raca || '').toLowerCase();
+        return raca === debouncedFilters.racaCor.toLowerCase() || raca.includes(debouncedFilters.racaCor.toLowerCase());
+      });
+    }
+
+    // Filtro por faixa de renda
+    if (debouncedFilters.faixaRenda) {
+      filtered = filtered.filter(enrollment => {
+        const renda = (enrollment.faixaRenda || enrollment.rendaFamiliar || '').toLowerCase();
+        return renda === debouncedFilters.faixaRenda.toLowerCase() || renda.includes(debouncedFilters.faixaRenda.toLowerCase());
+      });
+    }
+
+    // Filtro por situação habitacional
+    if (debouncedFilters.situacaoHabitacional) {
+      filtered = filtered.filter(enrollment => {
+        const situacao = (enrollment.situacaoHabitacional || '').toLowerCase();
+        return situacao === debouncedFilters.situacaoHabitacional.toLowerCase() || situacao.includes(debouncedFilters.situacaoHabitacional.toLowerCase());
+      });
+    }
+
+    // Filtro por série/turma
+    if (debouncedFilters.serie) {
+      filtered = filtered.filter(enrollment => {
+        const serie = (enrollment.serie || '').toLowerCase();
+        return serie === debouncedFilters.serie.toLowerCase() || serie.includes(debouncedFilters.serie.toLowerCase());
+      });
+    }
+
+    // Filtro por status
+    if (debouncedFilters.status) {
+      filtered = filtered.filter(enrollment => {
+        const status = (enrollment.status || '').toLowerCase();
+        return status === debouncedFilters.status.toLowerCase() || status.includes(debouncedFilters.status.toLowerCase());
+      });
+    }
+
+    setFilteredEnrollments(filtered);
+  }, [enrollments, debouncedFilters]);
+
   useEffect(() => {
     if (enrollments.length > 0) {
       applyFilters();
     }
-  }, [enrollments, debouncedFilters]);
+  }, [applyFilters, enrollments.length]);
 
   const loadEnrollments = async () => {
     try {
@@ -155,70 +219,6 @@ export default function RelatoriosPage() {
       console.log('Finalizando carregamento...');
       setLoading(false);
     }
-  };
-
-  const applyFilters = () => {
-    if (!enrollments || enrollments.length === 0) return;
-    
-    let filtered = [...enrollments];
-
-    // Filtro por idade
-    if (debouncedFilters.idadeMin || debouncedFilters.idadeMax) {
-      filtered = filtered.filter(enrollment => {
-        const birthDate = new Date(enrollment.dataNascimento);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        const actualAge = monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate()) ? age - 1 : age;
-        
-        const minAge = debouncedFilters.idadeMin ? parseInt(debouncedFilters.idadeMin) : 0;
-        const maxAge = debouncedFilters.idadeMax ? parseInt(debouncedFilters.idadeMax) : 6;
-        
-        return actualAge >= minAge && actualAge <= maxAge;
-      });
-    }
-
-    // Filtro por raça/cor
-    if (debouncedFilters.racaCor) {
-      filtered = filtered.filter(enrollment => {
-        const raca = (enrollment.racaCor || enrollment.raca || '').toLowerCase();
-        return raca === debouncedFilters.racaCor.toLowerCase() || raca.includes(debouncedFilters.racaCor.toLowerCase());
-      });
-    }
-
-    // Filtro por faixa de renda
-    if (debouncedFilters.faixaRenda) {
-      filtered = filtered.filter(enrollment => {
-        const renda = (enrollment.faixaRenda || enrollment.rendaFamiliar || '').toLowerCase();
-        return renda === debouncedFilters.faixaRenda.toLowerCase() || renda.includes(debouncedFilters.faixaRenda.toLowerCase());
-      });
-    }
-
-    // Filtro por situação habitacional
-    if (debouncedFilters.situacaoHabitacional) {
-      filtered = filtered.filter(enrollment => {
-        const situacao = (enrollment.situacaoHabitacional || '').toLowerCase();
-        return situacao === debouncedFilters.situacaoHabitacional.toLowerCase() || situacao.includes(debouncedFilters.situacaoHabitacional.toLowerCase());
-      });
-    }
-
-    // Filtro por série/turma
-    if (debouncedFilters.serie) {
-      filtered = filtered.filter(enrollment => {
-        const serie = (enrollment.serie || '').toLowerCase();
-        return serie === debouncedFilters.serie.toLowerCase() || serie.includes(debouncedFilters.serie.toLowerCase());
-      });
-    }
-
-    // Filtro por status
-    if (debouncedFilters.status) {
-      filtered = filtered.filter(enrollment => {
-        const status = (enrollment.status || '').toLowerCase();
-        return status === debouncedFilters.status.toLowerCase() || status.includes(debouncedFilters.status.toLowerCase());
-      });
-    }
-
-    setFilteredEnrollments(filtered);
   };
 
   const handleFilterChange = (field: string, value: string) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { PreEnrollmentService } from '@/lib/pre-enrollment-service'
@@ -43,11 +43,7 @@ export default function PreEnrollmentsPage() {
   const [preEnrollmentToDelete, setPreEnrollmentToDelete] = useState<string | null>(null)
 
   // Carregar dados
-  useEffect(() => {
-    loadData()
-  }, [filters])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true)
       const [preEnrollmentsData, statsData] = await Promise.all([
@@ -62,7 +58,11 @@ export default function PreEnrollmentsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   // Handlers
   const handleViewDetails = (preEnrollment: PreEnrollment) => {
