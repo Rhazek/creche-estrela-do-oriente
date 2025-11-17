@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useFieldArray, Control } from 'react-hook-form'
 import { Input } from './FormField'
 import { Button } from '@/components/ui/Button'
@@ -27,13 +27,7 @@ export function IrmaosNaCreche({ control, temIrmaosNaCreche }: IrmaosNaCrechePro
     name: 'irmaosNaCreche'
   })
 
-  useEffect(() => {
-    if (temIrmaosNaCreche && enrolledStudents.length === 0) {
-      loadEnrolledStudents()
-    }
-  }, [temIrmaosNaCreche])
-
-  const loadEnrolledStudents = async () => {
+  const loadEnrolledStudents = useCallback(async () => {
     setLoading(true)
     try {
       const students = await enrollmentEnrollmentService.getEnrolledStudents()
@@ -43,7 +37,13 @@ export function IrmaosNaCreche({ control, temIrmaosNaCreche }: IrmaosNaCrechePro
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (temIrmaosNaCreche && enrolledStudents.length === 0) {
+      loadEnrolledStudents()
+    }
+  }, [temIrmaosNaCreche, enrolledStudents.length, loadEnrolledStudents])
 
   const handleAddIrmao = () => {
     append({ nomeCompleto: '', idEnrollment: '' })

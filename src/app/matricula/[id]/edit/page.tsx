@@ -7,7 +7,6 @@ import AuthGuard from '@/components/AuthGuard'
 import RoleGuard from '@/components/RoleGuard'
 import { EnrollmentWizard } from '@/components/EnrollmentForm/EnrollmentWizard'
 import { EnrollmentService, FirestoreEnrollment } from '@/lib/enrollment-service'
-import { formatDateForInput } from '@/lib/enrollment-utils'
 import { EnrollmentFormData } from '@/lib/enrollment-schemas'
 import { PageHeader, Container } from '@/components/layout/LayoutWrapper'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -65,23 +64,19 @@ export default function EditEnrollmentPage() {
         nome: data.nome,
         identidade: data.identidade,
         // manter como Date para obedecer ao schema do formulário; ChildInfoStep formata para input
-        // converter para string YYYY-MM-DD para garantir exibição correta em inputs type="date"
         dataNascimento: (() => {
           const raw = data.dataNascimento
-          let birthDate: Date
           if (!raw) {
-            birthDate = new Date()
+            return new Date()
           } else if (typeof raw === 'string') {
-            birthDate = new Date(raw)
+            return new Date(raw)
           } else if (raw && typeof (raw as any).toDate === 'function') {
-            birthDate = (raw as any).toDate()
+            return (raw as any).toDate()
           } else if (raw instanceof Date) {
-            birthDate = raw
+            return raw
           } else {
-            birthDate = new Date(raw as any)
+            return new Date(raw as any)
           }
-
-          return formatDateForInput(birthDate)
         })(),
         sexo: data.sexo as any,
         corRaca: data.corRaca as any,

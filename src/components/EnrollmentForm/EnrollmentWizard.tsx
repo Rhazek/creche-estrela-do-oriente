@@ -88,7 +88,7 @@ export function EnrollmentWizard({
         toast.success('Rascunho carregado automaticamente')
       }
     }
-  }, [draftKey, isEditing])
+  }, [draftKey, isEditing, initialData])
 
   // Autosave do rascunho
   useEffect(() => {
