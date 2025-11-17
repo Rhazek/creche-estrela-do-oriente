@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/hooks/useAuth'
-import { formatPhone, formatDateForInput } from '@/lib/enrollment-utils'
+import { formatPhone } from '@/lib/enrollment-utils'
 
 interface EditPreEnrollmentPageProps {
     params: {
@@ -72,15 +72,12 @@ export default function EditPreEnrollmentPage({ params }: EditPreEnrollmentPageP
             birthDate = new Date(raw)
           }
 
-          // Converter para string no formato YYYY-MM-DD para que o input[type=date] mostre o valor
-          const birthDateForInput = formatDateForInput(birthDate)
-
           reset({
             nomeCrianca: data.nomeCrianca,
             raca: data.raca,
             sexo: data.sexo,
-            // passar como string YYYY-MM-DD para o input; register converter irá transformar em Date
-            dataNascimento: birthDateForInput,
+            // passar como Date para o schema; Input component faz conversão para display
+            dataNascimento: birthDate,
             responsavelNome: data.responsavelNome,
             responsavelContato: data.responsavelContato,
             endereco: data.endereco,

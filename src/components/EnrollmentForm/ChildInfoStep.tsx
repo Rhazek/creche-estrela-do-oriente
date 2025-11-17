@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { FormField, Input, Select, Textarea, Checkbox, RadioGroup, CheckboxList } from './FormField'
 import { ChildInfoSchema, type ChildInfo } from '@/lib/enrollment-schemas'
-import { formatDateForInput } from '@/lib/enrollment-utils'
 import { enrollmentEnrollmentService } from '@/lib/enrollment-enrollment-service'
 import { 
   User, 

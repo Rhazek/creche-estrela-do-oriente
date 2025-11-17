@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardHeader } from '@/components/ui/Card'
 import { FormField, Input, Checkbox } from './FormField'
 import { ReviewSchema, type Review } from '@/lib/enrollment-schemas'
-import { formatDateForInput, formatCurrency } from '@/lib/enrollment-utils'
+import { formatCurrency } from '@/lib/enrollment-utils'
 import { CheckCircle, Calendar, FileText, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 
