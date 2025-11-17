@@ -1,0 +1,50 @@
+{
+  "name": "creche-auth-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "set WATCHPACK_POLLING=true && set NODE_OPTIONS=--no-warnings --max-old-space-size=4096 && next dev",
+    "dev:polling": "set WATCHPACK_POLLING=true && set NODE_OPTIONS=--no-warnings --max-old-space-size=4096 && next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:prod": "docker-compose up -d",
+    "docker:down": "docker-compose down && docker-compose -f docker-compose.dev.yml down"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@protobufjs/aspromise": "^1.1.2",
+    "@protobufjs/base64": "^1.1.2",
+    "@protobufjs/codegen": "^2.0.4",
+    "@protobufjs/fetch": "^1.1.0",
+    "@protobufjs/path": "^1.1.2",
+    "autoprefixer": "^10.4.19",
+    "clsx": "^2.1.1",
+    "core-js": "^3.39.0",
+    "firebase": "^10.14.1",
+    "framer-motion": "^12.23.24",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.3",
+    "lucide-react": "^0.546.0",
+    "next": "14.2.5",
+    "postcss": "^8.4.38",
+    "react": "^18",
+    "react-countup": "^6.5.3",
+    "react-dom": "^18",
+    "react-hook-form": "^7.65.0",
+    "react-hot-toast": "^2.6.0",
+    "recharts": "^3.3.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^3.4.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
+    "typescript": "^5"
+  }
+}
