@@ -88,7 +88,7 @@ export function EnrollmentWizard({
         toast.success('Rascunho carregado automaticamente')
       }
     }
-  }, [draftKey, isEditing, initialData])
+  }, [draftKey, isEditing])
 
   // Autosave do rascunho
   useEffect(() => {
@@ -104,20 +104,19 @@ export function EnrollmentWizard({
   // Se houver `initialData` (prefill), usar como estado inicial.
   useEffect(() => {
     if (!initialData) return
-    console.log('EnrollmentWizard received initialData:', initialData)
+    // Initial data received
     setFormData(initialData)
   }, [initialData])
 
   const handleStepSubmit = (stepNumber: WizardStep, stepData: any) => {
-    console.log(`Salvando dados da etapa ${stepNumber}:`, stepData)
-    console.log('FormData antes:', formData)
+    // Saving step data
     
     setFormData(prev => {
       const newData = {
         ...prev,
         [`step${stepNumber}`]: stepData
       }
-      console.log('FormData depois:', newData)
+      // Form data updated
       return newData
     })
   }
@@ -191,9 +190,7 @@ export function EnrollmentWizard({
   const renderCurrentStep = () => {
     const stepData = formData[`step${currentStep}` as keyof EnrollmentFormData] as any || {}
     
-    // Debug: verificar se os dados estão sendo passados
-    console.log(`Etapa ${currentStep} - Dados:`, stepData)
-    console.log('FormData completo:', formData)
+    // Processing step data
 
     switch (currentStep) {
       case 1:

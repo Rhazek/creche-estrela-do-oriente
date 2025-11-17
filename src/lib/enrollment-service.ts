@@ -620,7 +620,7 @@ export class EnrollmentService {
   // Salvar rascunho
   static async saveDraft(userId: string, draftId: string, data: Partial<EnrollmentFormData>): Promise<void> {
     try {
-      console.log('Tentando salvar rascunho:', { userId, draftId, data })
+      // Saving draft
       
       // Usar estrutura com número par de segmentos: enrollments_drafts/{draftId}
       await setDoc(doc(db, 'enrollments_drafts', draftId), {
@@ -631,11 +631,9 @@ export class EnrollmentService {
         updatedAt: serverTimestamp()
       })
       
-      console.log('Rascunho salvo com sucesso!')
+      // Draft saved successfully
     } catch (error) {
-      console.error('Erro detalhado ao salvar rascunho:', error)
-      console.error('Tipo do erro:', typeof error)
-      console.error('Mensagem do erro:', error instanceof Error ? error.message : 'Erro desconhecido')
+      console.error('Error saving draft:', error)
       throw new Error('Erro ao salvar rascunho')
     }
   }

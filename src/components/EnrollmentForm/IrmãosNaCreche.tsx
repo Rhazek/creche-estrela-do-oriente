@@ -31,7 +31,7 @@ export function IrmaosNaCreche({ control, temIrmaosNaCreche }: IrmaosNaCrechePro
     if (temIrmaosNaCreche && enrolledStudents.length === 0) {
       loadEnrolledStudents()
     }
-  }, [temIrmaosNaCreche, enrolledStudents.length])
+  }, [temIrmaosNaCreche])
 
   const loadEnrolledStudents = async () => {
     setLoading(true)

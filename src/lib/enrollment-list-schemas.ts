@@ -121,7 +121,7 @@ export const calcularIdade = (dataNascimento: string): number => {
     }
 
     if (isNaN(nascimento.getTime())) {
-      console.error('❌ Data de nascimento inválida:', dataNascimento)
+      // Invalid birth date
       return 0
     }
 
@@ -135,7 +135,7 @@ export const calcularIdade = (dataNascimento: string): number => {
 
     return idade >= 0 ? idade : 0
   } catch (error) {
-    console.error('❌ Erro ao calcular idade:', error)
+    // Error calculating age
     return 0
   }
 }

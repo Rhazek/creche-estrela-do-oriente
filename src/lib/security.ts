@@ -124,8 +124,7 @@ export class SecurityUtils {
       ip: 'client-side' // Em produção, isso viria do servidor
     };
 
-    // Em produção, isso seria enviado para um serviço de logging
-    console.log('Security Event:', logEntry);
+    // Security event logged
     
     // Salvar localmente para debug
     const logs = JSON.parse(localStorage.getItem('security_logs') || '[]');

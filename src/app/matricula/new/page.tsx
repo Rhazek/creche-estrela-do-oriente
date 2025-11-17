@@ -58,15 +58,15 @@ function NewEnrollmentContent() {
 
   useEffect(() => {
     const loadPrefill = async () => {
-      console.log('NewEnrollmentContent prefillFrom param:', prefillFrom)
+      // Prefill detected
       if (!prefillFrom) return
       try {
         let enrollment = await EnrollmentService.getEnrollment(prefillFrom)
         if (!enrollment) {
-          console.warn('EnrollmentService não retornou matrícula para prefillFrom=', prefillFrom, '- tentando EnrollmentListService...')
+          // Trying fallback service
           const alt = await EnrollmentListService.getEnrollment(prefillFrom)
           if (!alt) {
-            console.warn('Nenhuma matrícula encontrada por EnrollmentListService para prefillFrom=', prefillFrom)
+            // No enrollment found
             return
           }
           // adaptar o formato retornado por EnrollmentListService para o usado adiante
@@ -85,14 +85,23 @@ function NewEnrollmentContent() {
             // suportar ambos os formatos: `nome` ou `nomeCrianca`
             nome: (enrollment as any).nome || (enrollment as any).nomeCrianca || '',
             identidade: (enrollment as any).identidade || '',
-            // manter como Date para obedecer ao schema do formulário
-            dataNascimento: typeof (enrollment as any).dataNascimento === 'string'
-              ? new Date((enrollment as any).dataNascimento)
-              : (enrollment as any).dataNascimento instanceof Date
-                ? (enrollment as any).dataNascimento
-                : ((enrollment as any).dataNascimento && typeof (enrollment as any).dataNascimento.toDate === 'function')
-                  ? (enrollment as any).dataNascimento.toDate()
-                  : new Date(),
+            // Converter para string YYYY-MM-DD para exibição correta em input[type=date]
+            dataNascimento: (() => {
+              const raw = (enrollment as any).dataNascimento
+              let birthDate: Date
+              if (!raw) {
+                birthDate = new Date()
+              } else if (typeof raw === 'string') {
+                birthDate = new Date(raw)
+              } else if (raw && typeof (raw as any).toDate === 'function') {
+                birthDate = (raw as any).toDate()
+              } else if (raw instanceof Date) {
+                birthDate = raw
+              } else {
+                birthDate = new Date(raw as any)
+              }
+              return formatDateForInput(birthDate)
+            })(),
             sexo: (enrollment as any).sexo || undefined,
             corRaca: (enrollment as any).corRaca || (enrollment as any).raca || undefined,
             gemeos: (enrollment as any).gemeos || false,
@@ -153,11 +162,10 @@ function NewEnrollmentContent() {
           }
         }
 
-        console.log('Prefill enrollment raw:', enrollment)
-        console.log('Prefill converted initialData:', converted)
+        // Data prefilled successfully
         setInitialData(converted)
       } catch (error) {
-        console.error('Erro ao carregar matrícula para prefill:', error)
+        // Error loading enrollment for prefill - using empty form
       }
     }
 

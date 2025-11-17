@@ -41,8 +41,6 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'approved' | 'deleted'>('approved')
-  const [deletedUsers, setDeletedUsers] = useState<ApprovedUser[]>([])
   const confirmDialog = useConfirmDialog()
 
   useEffect(() => {
@@ -65,12 +63,10 @@ export default function UsersPage() {
         }
       }) as ApprovedUser[]
       
-      // Separar usuários ativos e deletados
+      // Filtrar apenas usuários ativos (não deletados)
       const activeUsers = approvedUsers.filter(user => !user.deletado)
-      const deletedUsers = approvedUsers.filter(user => user.deletado)
       
       setApprovedUsers(activeUsers)
-      setDeletedUsers(deletedUsers)
       
       // Users successfully loaded
       
@@ -120,19 +116,7 @@ export default function UsersPage() {
     })
   }
 
-  const handleRestoreUser = (userId: string) => {
-    const user = deletedUsers.find(u => u.id === userId)
-    if (!user) return
 
-    confirmDialog.confirm({
-      title: 'Confirmar Reativação',
-      message: `Tem certeza que deseja reativar o usuário ${user.nomeCompleto}?\n\nEsta ação:\n• Restaurará o acesso do usuário ao sistema\n• O usuário poderá fazer login novamente\n• Todas as permissões serão restauradas`,
-      variant: 'success',
-      confirmText: 'Reativar Usuário',
-      cancelText: 'Cancelar',
-      onConfirm: () => restoreUser(userId)
-    })
-  }
 
   
 
@@ -219,54 +203,7 @@ export default function UsersPage() {
     }
   }
 
-  const restoreUser = async (userId: string) => {
-    try {
-      setProcessing(userId)
-      setError('')
-      // Reactivating user
-      
-      // Find the user in deleted list
-      const user = deletedUsers.find(u => u.id === userId)
-      if (!user) {
-        throw new Error('Usuário não encontrado na lista de deletados')
-      }
-      
-      // User found, proceeding with restoration
-      
-      // Remove deleted flag in usuarios collection
-      const userRef = doc(db, 'usuarios', userId)
-      // Reactivating user
-      
-      await updateDoc(userRef, {
-        deletado: false,
-        dataReativacao: new Date(),
-        reativadoPor: 'admin' // TODO: Pegar do usuário logado
-      })
-      // User reactivated in database
 
-      // Remove from deleted list and add to active
-      setDeletedUsers(prev => prev.filter(u => u.id !== userId))
-      setApprovedUsers(prev => [...prev, { ...user, deletado: false }])
-      // User moved to active list
-      
-      // User reactivated successfully
-      
-    } catch (error: any) {
-      console.error('Error reactivating user:', error)
-      
-      if (error.code === 'permission-denied') {
-        setError('Erro de permissão: Verifique as regras do Firestore')
-      } else if (error.code === 'not-found') {
-        setError('Usuário não encontrado no sistema')
-      } else if (error.message.includes('Usuário não encontrado')) {
-        setError('Usuário não encontrado na lista de deletados')
-      } else {
-        setError(`Erro ao reativar usuário: ${error.message}`)
-      }
-    } finally {
-      setProcessing(null)
-    }
-  }
 
   const formatDate = (date: any) => {
     if (!date) return 'N/A'
@@ -359,46 +296,15 @@ export default function UsersPage() {
             </motion.div>
           </div>
 
-          {/* Abas */}
+          {/* Título da seção de usuários */}
           <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                {/* Aba de solicitações pendentes removida (cadastro desativado) */}
-                <button
-                  onClick={() => setActiveTab('approved')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'approved'
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4" />
-                    <span>Usuários Ativos ({approvedUsers.length})</span>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setActiveTab('deleted')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'deleted'
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <UserX className="h-4 w-4" />
-                    <span>Usuários Excluídos ({deletedUsers.length})</span>
-                  </div>
-                </button>
-              </nav>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>Usuários Ativos ({approvedUsers.length})</span>
+            </h2>
           </div>
 
-          {/* Conteúdo das Abas */}
-
-          {activeTab === 'approved' && (
-            <>
-              {/* Lista de Usuários Aprovados */}
+          {/* Lista de Usuários Aprovados */}
               {approvedUsers.length === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
@@ -501,94 +407,7 @@ export default function UsersPage() {
                   ))}
                 </div>
               )}
-            </>
-          )}
 
-          {activeTab === 'deleted' && (
-            <>
-              {/* Lista de Usuários Deletados */}
-              {deletedUsers.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <UserX className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Nenhum usuário excluído
-                    </h3>
-                    <p className="text-gray-600">
-                      Não há usuários excluídos no momento.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-6">
-                  {deletedUsers.map((user, index) => (
-                    <motion.div
-                      key={user.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="border-error-200 bg-error-50">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-4">
-                                <div className="w-12 h-12 bg-error-100 rounded-full flex items-center justify-center">
-                                  <UserX className="h-6 w-6 text-error-600" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-semibold text-gray-900">
-                                    {user.nomeCompleto}
-                                  </h3>
-                                  <p className="text-gray-600">{user.email}</p>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <div className="flex items-center space-x-2 text-gray-600">
-                                  <Briefcase className="h-4 w-4" />
-                                  <span className="text-sm">{user.cargo}</span>
-                                </div>
-                                <div className="flex items-center space-x-2 text-gray-600">
-                                  <Shield className="h-4 w-4" />
-                                  <span className={`text-sm px-2 py-1 rounded-full ${
-                                    user.perfil === 'administrador' 
-                                      ? 'bg-primary-100 text-primary-800' 
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {user.perfil === 'administrador' ? 'Administrador' : 'Funcionário'}
-                                  </span>
-                                </div>
-                                <div className="flex items-center space-x-2 text-gray-600">
-                                  <Calendar className="h-4 w-4" />
-                                  <span className="text-sm">
-                                    Excluído em {formatDate(user.dataExclusao)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col space-y-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRestoreUser(user.id)}
-                                disabled={processing === user.id}
-                                className="text-success-600 border-success-600 hover:bg-success-50"
-                              >
-                                <UserCheck className="h-4 w-4 mr-1" />
-                                Reativar Usuário
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
         </Container>
 
         {/* Dialog de Confirmação */}

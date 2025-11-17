@@ -93,7 +93,7 @@ export function useCache<T>(
             setCachedData(key, freshData);
             setData(freshData);
           } catch (err) {
-            console.warn('Falha ao atualizar cache:', err);
+            // Error updating cache in background
           }
         }
         return;
@@ -146,8 +146,8 @@ export function useLazyComponent<T>(
     try {
       setLoading(true);
       setError(null);
-      const loadedModule = await importFn();
-      setComponent(() => (loadedModule as any).default);
+      const imported = await importFn();
+      setComponent(() => imported.default);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -160,20 +160,18 @@ export function useLazyComponent<T>(
   }, [loadComponent]);
 
   if (loading) {
-    if (fallback) return fallback as unknown as T
-
-    const LoadingComponent: React.FC = () => React.createElement('div', null, 'Carregando...')
-    LoadingComponent.displayName = 'UseLazyComponent_Loading'
-    return LoadingComponent as unknown as T
+    const LoadingFallback: React.FC = () => React.createElement('div', null, 'Carregando...');
+    LoadingFallback.displayName = 'UseLazyComponentLoadingFallback';
+    return fallback ? fallback : LoadingFallback;
   }
 
   if (error) {
-    const ErrorComponent: React.FC = () => React.createElement('div', null, `Erro ao carregar componente: ${error.message}`)
-    ErrorComponent.displayName = 'UseLazyComponent_Error'
-    return ErrorComponent as unknown as T
+    const ErrorFallback: React.FC = () => React.createElement('div', null, `Erro ao carregar componente: ${error?.message || 'Erro'}`);
+    ErrorFallback.displayName = 'UseLazyComponentErrorFallback';
+    return ErrorFallback;
   }
 
-  return Component
+  return Component;
 }
 
 // Hook para monitoramento de performance
@@ -220,10 +218,7 @@ export function usePerformanceMonitor() {
     
     setMetrics(prev => ({ ...prev, renderTime }));
     
-    // Log para desenvolvimento
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`${name} render time: ${renderTime.toFixed(2)}ms`);
-    }
+    // Render time measured
     
     return renderTime;
   }, []);

@@ -22,23 +22,22 @@ export function useAuth() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      console.log('Auth state changed:', user?.email)
+      // Auth state updated
       setUser(user)
       
       if (user) {
         try {
-          console.log('🔍 Verificando status do usuário:', user.uid)
+          // Checking user status
           
           // Verificar se está na coleção usuarios (usuários aprovados)
           const userDoc = await getDoc(doc(db, 'usuarios', user.uid))
           
           if (userDoc.exists()) {
             const userData = userDoc.data()
-            console.log('✅ Usuário encontrado em usuarios (aprovado):', userData)
             
             // Verificar se o usuário foi marcado como deletado
             if (userData.deletado) {
-              console.log('❌ Usuário foi marcado como deletado, removendo acesso')
+              // User marked as deleted, removing access
               // Fazer logout do usuário
               await auth.signOut()
               setUserProfile(null)
@@ -59,10 +58,8 @@ export function useAuth() {
             setUserProfile(profile as UserProfile)
             setIsApproved(true)
             localStorage.setItem('userProfile', JSON.stringify(profile))
-            console.log('🎉 Usuário aprovado e configurado!')
           } else {
             // Usuário não encontrado na coleção 'usuarios' — acesso negado
-            console.log('❌ Usuário não encontrado em usuarios (aprovados). Encerrando sessão.')
             try {
               await auth.signOut()
             } catch (e) {

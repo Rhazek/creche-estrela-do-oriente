@@ -39,21 +39,7 @@ export const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       {shouldShowSidebar && (
-        <>
-          <Sidebar />
-          
-          {/* Botão hambúrguer para mobile */}
-          <div className="lg:hidden fixed top-4 left-4 z-50">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsMobileOpen(true)}
-              className="shadow-lg"
-            >
-              <Menu className="h-4 w-4" />
-            </Button>
-          </div>
-        </>
+        <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
       )}
 
       {/* Conteúdo principal */}
@@ -64,7 +50,7 @@ export const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
       )}>
         {/* Header fixo para mobile */}
         <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center relative">
             <h1 className="text-lg font-semibold text-gray-900">
               Creche-Escola
             </h1>
@@ -72,6 +58,7 @@ export const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileOpen(true)}
+              className="absolute right-0"
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -84,12 +71,7 @@ export const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
         </div>
       </main>
 
-      {/* Sidebar mobile */}
-      {shouldShowSidebar && isMobileOpen && (
-        <div className="lg:hidden">
-          <Sidebar />
-        </div>
-      )}
+
     </div>
   )
 }

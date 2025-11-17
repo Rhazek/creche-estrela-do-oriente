@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import AuthGuard from '@/components/AuthGuard'
@@ -24,7 +24,11 @@ export default function EnrollmentHistoryPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadData = useCallback(async () => {
+  useEffect(() => {
+    loadData()
+  }, [enrollmentId])
+
+  const loadData = async () => {
     try {
       setIsLoading(true)
       setError(null)
@@ -50,11 +54,7 @@ export default function EnrollmentHistoryPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [enrollmentId])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
+  }
 
   const formatDate = (timestamp: any): string => {
     if (!timestamp) return 'N/A'

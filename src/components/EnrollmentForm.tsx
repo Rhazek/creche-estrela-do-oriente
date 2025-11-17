@@ -135,7 +135,7 @@ export default function EnrollmentForm() {
         timestamp: new Date().toISOString()
       });
       
-      console.log('Matrícula cadastrada com ID:', docRef.id);
+      // Enrollment saved successfully
       
       setSuccess(true);
       // Reset form
@@ -165,9 +165,9 @@ export default function EnrollmentForm() {
         dataMatricula: new Date().toISOString().split('T')[0]
       });
     } catch (error: any) {
-      console.error('Erro detalhado:', error);
+      console.error('Error saving enrollment:', error);
       
-      // Fallback: salvar localmente se o Firebase falhar
+      // Fallback: save locally if Firebase fails
       try {
         const enrollmentData = {
           ...formData,
@@ -181,7 +181,7 @@ export default function EnrollmentForm() {
         existingEnrollments.push(enrollmentData);
         localStorage.setItem('matriculas', JSON.stringify(existingEnrollments));
         
-        console.log('Matrícula salva localmente como backup');
+        // Enrollment saved locally as backup
         setSavedLocally(true);
         setSuccess(true);
         
@@ -213,9 +213,9 @@ export default function EnrollmentForm() {
         });
         
       } catch (localError) {
-        console.error('Erro ao salvar localmente:', localError);
+        console.error('Error saving locally:', localError);
         
-        // Tratamento específico de erros do Firestore
+        // Specific Firebase error handling
         if (error.code === 'permission-denied') {
           setError('Erro de permissão. Verifique as configurações do Firebase.');
         } else if (error.code === 'unavailable') {

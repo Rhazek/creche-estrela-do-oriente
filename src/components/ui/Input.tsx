@@ -5,6 +5,13 @@ import { cn } from '@/lib/utils'
 import { AlertCircle } from 'lucide-react'
 
 /**
+ * Converte uma data para o formato YYYY-MM-DD usado por input[type=date]
+ */
+const formatDateForInput = (date: Date): string => {
+  return date.toISOString().split('T')[0]
+}
+
+/**
  * Props do componente Input
  */
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -32,6 +39,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     fullWidth = false,
     ...props
   }, ref) => {
+    const { defaultValue, value } = props
+
+    // Se defaultValue for Date, converter para YYYY-MM-DD (para input[type=date])
+    const defaultValConverted =
+      defaultValue instanceof Date ? formatDateForInput(defaultValue) : defaultValue
+
+    // Só passar `value` se foi explicitamente fornecido (comportamento controlado).
+    // Caso contrário, passar `defaultValue` para manter o input como uncontrolled,
+    // permitindo que react-hook-form faça o controle via register/reset.
+    const inputProps: any = { type, ref, ...props }
+    if (value !== undefined) {
+      inputProps.value = value
+    } else if (defaultValConverted !== undefined) {
+      inputProps.defaultValue = defaultValConverted
+    }
+
     // Classes base
     const baseClasses = [
       'block w-full',
@@ -88,18 +111,41 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           
           {/* Input principal com suporte a Date para inputs type="date" */}
-          <input
-            ref={ref}
-            type={type}
-            className={classes}
-            {...props}
-            value={(() => {
-              if (type === 'date' && props.value instanceof Date) {
-                return props.value.toISOString().split('T')[0]
+          {(() => {
+            const propValue = (props as any).value
+            const propDefault = (props as any).defaultValue
+            
+            // Preparar props do input
+            const inputProps = { ...(props as any) }
+            delete inputProps.value
+            delete inputProps.defaultValue
+
+            // Se temos value explícito, usar como controlado
+            if (propValue !== undefined) {
+              if (type === 'date' && propValue instanceof Date) {
+                inputProps.value = propValue.toISOString().split('T')[0]
+              } else {
+                inputProps.value = propValue
               }
-              return (props as any).value === undefined ? '' : (props as any).value
-            })()}
-          />
+            } 
+            // Caso contrário, usar defaultValue (não controlado - melhor para react-hook-form)
+            else if (propDefault !== undefined) {
+              if (type === 'date' && propDefault instanceof Date) {
+                inputProps.defaultValue = propDefault.toISOString().split('T')[0]
+              } else {
+                inputProps.defaultValue = propDefault
+              }
+            }
+
+            return (
+              <input
+                ref={ref}
+                type={type}
+                className={classes}
+                {...inputProps}
+              />
+            )
+          })()}
           
           {icon && iconPosition === 'right' && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import AuthGuard from '@/components/AuthGuard'
 import RoleGuard from '@/components/RoleGuard'
@@ -34,8 +34,11 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   // Carregar dados quando o modo ou filtros mudarem
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const loadDashboardData = useCallback(async () => {
+  useEffect(() => {
+    loadDashboardData()
+  }, [mode, filters])
+
+  const loadDashboardData = async () => {
     try {
       setLoading(true)
 
@@ -55,9 +58,9 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }
 
-  async function loadStats(): Promise<StatCard[]> {
+  const loadStats = async (): Promise<StatCard[]> => {
     let statsData
 
     switch (mode) {
@@ -270,7 +273,7 @@ export default function DashboardPage() {
     }
   }
 
-  async function loadCharts(): Promise<ChartConfig[]> {
+  const loadCharts = async (): Promise<ChartConfig[]> => {
     const collectionName = getCollectionName()
 
     try {
@@ -338,10 +341,6 @@ export default function DashboardPage() {
       return []
     }
   }
-
-  useEffect(() => {
-    loadDashboardData()
-  }, [loadDashboardData])
 
   const getCollectionName = (): string => {
     switch (mode) {

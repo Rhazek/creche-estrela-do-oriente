@@ -15,33 +15,25 @@ const firebaseConfig = {
 
 // Validate that all required environment variables are present
 if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
-    console.error('Firebase configuration missing:', {
-        apiKey: !!firebaseConfig.apiKey,
-        authDomain: !!firebaseConfig.authDomain,
-        projectId: !!firebaseConfig.projectId
-    });
     throw new Error('Missing Firebase configuration. Please check your .env.local file.');
 }
 
-console.log('Firebase configuration loaded:', {
-    projectId: firebaseConfig.projectId,
-    authDomain: firebaseConfig.authDomain
-});
+// Firebase configuration validated
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-console.log('Firebase app initialized successfully');
+// Firebase app initialized
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
-console.log('Firebase Auth initialized');
+// Firebase Auth initialized
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
-console.log('Firebase Firestore initialized');
+// Firebase Firestore initialized
 
 // Initialize Firebase Storage and get a reference to the service
 export const storage = getStorage(app);
-console.log('Firebase Storage initialized');
+// Firebase Storage initialized
 
 export default app;

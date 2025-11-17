@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import AuthGuard from '@/components/AuthGuard'
@@ -29,7 +29,11 @@ export default function EditEnrollmentPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const loadEnrollment = useCallback(async () => {
+  useEffect(() => {
+    loadEnrollment()
+  }, [enrollmentId])
+
+  const loadEnrollment = async () => {
     try {
       setIsLoading(true)
       setError(null)
@@ -53,11 +57,7 @@ export default function EditEnrollmentPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [enrollmentId])
-
-  useEffect(() => {
-    loadEnrollment()
-  }, [loadEnrollment])
+  }
 
   const convertFirestoreToFormData = (data: FirestoreEnrollment): Partial<EnrollmentFormData> => {
     return {
@@ -65,13 +65,24 @@ export default function EditEnrollmentPage() {
         nome: data.nome,
         identidade: data.identidade,
         // manter como Date para obedecer ao schema do formulário; ChildInfoStep formata para input
-        dataNascimento: typeof data.dataNascimento === 'string'
-          ? new Date(data.dataNascimento)
-          : data.dataNascimento instanceof Date
-            ? data.dataNascimento
-            : data.dataNascimento && typeof data.dataNascimento.toDate === 'function'
-              ? data.dataNascimento.toDate()
-              : new Date(),
+        // converter para string YYYY-MM-DD para garantir exibição correta em inputs type="date"
+        dataNascimento: (() => {
+          const raw = data.dataNascimento
+          let birthDate: Date
+          if (!raw) {
+            birthDate = new Date()
+          } else if (typeof raw === 'string') {
+            birthDate = new Date(raw)
+          } else if (raw && typeof (raw as any).toDate === 'function') {
+            birthDate = (raw as any).toDate()
+          } else if (raw instanceof Date) {
+            birthDate = raw
+          } else {
+            birthDate = new Date(raw as any)
+          }
+
+          return formatDateForInput(birthDate)
+        })(),
         sexo: data.sexo as any,
         corRaca: data.corRaca as any,
         gemeos: data.gemeos,

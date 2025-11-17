@@ -37,15 +37,20 @@ interface NavItem {
  */
 interface SidebarProps {
   className?: string
+  isMobileOpen?: boolean
+  setIsMobileOpen?: (open: boolean) => void
 }
 
 /**
  * Componente Sidebar responsiva e moderna
  * Navegação lateral com ícones e labels
  */
-export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  className, 
+  isMobileOpen = false, 
+  setIsMobileOpen = () => {} 
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -109,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         },
         {
           label: 'Usuários',
-          href: '/aprovacao',
+          href: '/usuarios',
           icon: <UserCheck className="h-5 w-5" />,
           roles: ['administrador']
         }
@@ -132,11 +137,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   // Classes da sidebar
   const sidebarClasses = cn(
-    'fixed left-0 top-0 z-50',
+    'fixed top-0 z-50',
     'h-full bg-white border-r border-gray-200',
     'transition-all duration-300 ease-in-out',
     'flex flex-col',
-    isCollapsed ? 'w-16' : 'w-64',
+    // Desktop: sempre visível no lado esquerdo, controla apenas collapse
+    'hidden lg:flex lg:left-0',
+    isCollapsed ? 'lg:w-16' : 'lg:w-64',
+    // Mobile: centralizado e controlado por isMobileOpen
+    isMobileOpen ? 'flex w-80 left-1/2 transform -translate-x-1/2' : 'hidden',
     className
   )
 

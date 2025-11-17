@@ -72,8 +72,7 @@ export class EnrollmentListService {
         }
       }
 
-      console.log('📅 Data de nascimento da pré-matrícula (raw):', preEnrollment.dataNascimento)
-      console.log('📅 Data convertida para ISO string:', dataNascimentoISO)
+      // Date converted to ISO string
       
       const enrollmentData = {
         // Dados da criança (mapeamento direto)
@@ -110,10 +109,10 @@ export class EnrollmentListService {
       const cleanedData = cleanUndefinedValues(enrollmentData)
       const enrollmentRef = await addDoc(collection(db, 'enrollments'), cleanedData)
       
-      console.log('✅ Matrícula criada a partir de pré-matrícula:', enrollmentRef.id)
+      // Enrollment created from pre-enrollment
       return enrollmentRef.id
     } catch (error) {
-      console.error('Erro ao criar matrícula a partir de pré-matrícula:', error)
+      console.error('Error creating enrollment from pre-enrollment:', error)
       throw new Error('Erro ao criar matrícula')
     }
   }
@@ -138,26 +137,20 @@ export class EnrollmentListService {
       
       // Converter data de nascimento para string ISO se necessário
       let dataNascimento = data.dataNascimento
-      console.log('📅 Antes da conversão:', dataNascimento, 'tipo:', typeof dataNascimento)
+      // Date conversion process
       
       // Verificar se é um Map
       if (dataNascimento && typeof dataNascimento === 'object' && dataNascimento.constructor.name === 'Map') {
-        console.log('📅 É um Map, convertendo...')
         dataNascimento = new Date(dataNascimento.get('seconds') * 1000).toISOString()
       } else if (dataNascimento instanceof Date) {
         dataNascimento = dataNascimento.toISOString()
-        console.log('📅 Convertido de Date para ISO')
       } else if (dataNascimento && typeof dataNascimento.toDate === 'function') {
         dataNascimento = dataNascimento.toDate().toISOString()
-        console.log('📅 Convertido de Timestamp para ISO')
       } else if (typeof dataNascimento === 'string') {
-        console.log('📅 Já é string:', dataNascimento)
+        // Already a string
       } else {
         dataNascimento = new Date().toISOString()
-        console.log('📅 Usando data atual como fallback')
       }
-      
-      console.log('📅 Depois da conversão:', dataNascimento)
       
       return {
         id: enrollmentDoc.id,
@@ -210,11 +203,11 @@ export class EnrollmentListService {
         // Converter data de nascimento para string ISO se necessário
         let dataNascimento = data.dataNascimento
         
-        // Se já é string, verificar se é válida
+        // If already string, verify if valid
         if (typeof dataNascimento === 'string') {
           const testDate = new Date(dataNascimento)
           if (isNaN(testDate.getTime())) {
-            console.warn('⚠️ Data string inválida:', dataNascimento)
+            // Invalid string date
             dataNascimento = new Date().toISOString()
           }
         } else if (dataNascimento && typeof dataNascimento === 'object' && dataNascimento.constructor.name === 'Map') {
@@ -224,7 +217,7 @@ export class EnrollmentListService {
         } else if (dataNascimento && typeof dataNascimento.toDate === 'function') {
           dataNascimento = dataNascimento.toDate().toISOString()
         } else if (typeof dataNascimento !== 'string') {
-          console.warn('⚠️ Data de nascimento em formato não reconhecido:', dataNascimento)
+          // Date in unrecognized format
           dataNascimento = new Date().toISOString()
         }
         

@@ -69,7 +69,11 @@ export default function EnrollmentsPage() {
   }, [searchTerm])
 
   // Carregar dados
-  const loadData = useCallback(async () => {
+  useEffect(() => {
+    loadData()
+  }, [filters])
+
+  const loadData = async () => {
     try {
       setLoading(true)
       const [enrollmentsData, statsData] = await Promise.all([
@@ -84,12 +88,7 @@ export default function EnrollmentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [filters])
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
-
+  }
 
   // Handlers
   const handleViewDetails = (enrollment: Enrollment) => {

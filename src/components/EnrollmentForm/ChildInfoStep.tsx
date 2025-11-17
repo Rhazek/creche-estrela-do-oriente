@@ -81,7 +81,7 @@ export function ChildInfoStep({ data, onSubmit, onSaveDraft, onDataChange }: Chi
     defaultValues: {
       nome: data?.nome || '',
       identidade: data?.identidade || '',
-      dataNascimento: data?.dataNascimento || undefined,
+      dataNascimento: data?.dataNascimento ? (data.dataNascimento instanceof Date ? data.dataNascimento : new Date(data.dataNascimento as any)) : undefined,
       sexo: data?.sexo || undefined,
       corRaca: data?.corRaca || undefined,
       gemeos: data?.gemeos || false,
@@ -106,14 +106,12 @@ export function ChildInfoStep({ data, onSubmit, onSaveDraft, onDataChange }: Chi
     }
   })
 
-  const temIrmaosNaCrecheWatched = watch('temIrmaosNaCreche')
-
   // Carregar alunos matriculados quando o checkbox for marcado
   useEffect(() => {
-    if (temIrmaosNaCrecheWatched && enrolledStudents.length === 0) {
+    if (watch('temIrmaosNaCreche') && enrolledStudents.length === 0) {
       loadEnrolledStudents()
     }
-  }, [temIrmaosNaCrecheWatched, enrolledStudents.length])
+  }, [watch('temIrmaosNaCreche')])
 
   const loadEnrolledStudents = async () => {
     setLoadingStudents(true)
@@ -156,8 +154,8 @@ export function ChildInfoStep({ data, onSubmit, onSaveDraft, onDataChange }: Chi
       reset({
         nome: data.nome || '',
         identidade: data.identidade || '',
-        // Manter como Date para o schema; o input converterá para string via register setValueAs
-        dataNascimento: birthDate,
+        // Passar como string YYYY-MM-DD para que o input exiba o valor
+        dataNascimento: (birthDate ? birthDate.toISOString().split('T')[0] : '') as any,
         sexo: data.sexo || undefined,
         corRaca: data.corRaca || undefined,
         gemeos: data.gemeos || false,
@@ -180,6 +178,15 @@ export function ChildInfoStep({ data, onSubmit, onSaveDraft, onDataChange }: Chi
         tipoAuxilio: data.tipoAuxilio || undefined,
         numeroNIS: data.numeroNIS || ''
       })
+
+      // Forçar setValue para dataNascimento após o reset para garantir que apareça no input
+      if (birthDate) {
+        setTimeout(() => {
+          // Forçar string YYYY-MM-DD para que o input[type=date] exiba o valor
+          const dateString = birthDate.toISOString().split('T')[0]
+          setValue('dataNascimento', dateString as any)
+        }, 100)
+      }
     }
   }, [data, reset])
 

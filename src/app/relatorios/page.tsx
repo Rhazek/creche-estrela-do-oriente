@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import AuthGuard from '@/components/AuthGuard';
@@ -67,7 +67,96 @@ export default function RelatoriosPage() {
     loadEnrollments();
   }, []);
 
-  const applyFilters = useCallback(() => {
+  useEffect(() => {
+    if (enrollments.length > 0) {
+      applyFilters();
+    }
+  }, [enrollments, debouncedFilters]);
+
+  const loadEnrollments = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Loading enrollments
+      
+      // Try loading from Firebase
+      try {
+        // Connecting to Firebase
+        const q = query(collection(db, 'enrollments'), orderBy('criadoEm', 'desc'));
+        const querySnapshot = await getDocs(q);
+        
+        // Carregar dados principais e subcoleções
+        const firebaseData = await Promise.all(querySnapshot.docs.map(async (doc) => {
+          const data = doc.data();
+          
+          // Buscar primeiro responsável da subcollection
+          let primeiroResponsavel = null;
+          let primeiroTelefone = null;
+          
+          try {
+            const guardiansSnapshot = await getDocs(collection(db, 'enrollments', doc.id, 'guardians'));
+            if (!guardiansSnapshot.empty) {
+              const primeiroGuardian = guardiansSnapshot.docs[0].data();
+              primeiroResponsavel = primeiroGuardian.nome || primeiroGuardian.nomeCompleto || null;
+              primeiroTelefone = primeiroGuardian.celular || primeiroGuardian.telefone || null;
+            }
+          } catch (error) {
+            // Error loading guardians for enrollment
+          }
+          
+          // Normalizar campos para compatibilidade
+          const normalizedData: EnrollmentData = {
+            id: doc.id,
+            nomeCompleto: data.nomeCrianca || data.nome || data.nomeCompleto || '',
+            nomeCrianca: data.nomeCrianca,
+            nome: data.nome,
+            dataNascimento: data.dataNascimento,
+            cpf: data.cpfCrianca || data.cpf || '',
+            nomeResponsavel: primeiroResponsavel || data.responsavelNome || data.nomeResponsavel || data.nomeResponsavel1 || '',
+            responsavelNome: data.responsavelNome,
+            telefone: primeiroTelefone || data.responsavelContato || data.telefone || '',
+            responsavelContato: data.responsavelContato,
+            email: data.email,
+            endereco: data.logradouro || data.endereco || '',
+            numero: data.numero,
+            bairro: data.bairro,
+            cidade: data.municipio || data.cidade || '',
+            racaCor: data.corRaca || data.raca || data.racaCor || '',
+            raca: data.raca || data.corRaca,
+            faixaRenda: data.rendaFamiliar || data.faixaRenda || '',
+            rendaFamiliar: data.rendaFamiliar,
+            rendaPerCapita: data.rendaPerCapita,
+            numeroPessoasFamilia: data.numeroPessoasFamilia?.toString() || '',
+            situacaoHabitacional: data.tipoOcupacao || data.situacaoHabitacional || '',
+            possuiDeficiencia: data.necessidadesEspeciais ? 'sim' : 'nao',
+            necessidadesEspeciais: data.necessidadesEspeciais,
+            tipoDeficiencia: data.tipoDeficiencia || data.descricaoNecessidade,
+            serie: data.serie || '',
+            dataCadastro: data.criadoEm,
+            criadoEm: data.criadoEm,
+            status: data.status || 'pendente'
+          };
+          
+          return normalizedData;
+        }));
+        
+        // Data loaded from Firebase
+        setEnrollments(firebaseData);
+      } catch (firebaseError) {
+        console.error('Error loading from Firebase:', firebaseError);
+        setError('Erro ao carregar dados do Firebase');
+      }
+    } catch (error: any) {
+      console.error('Error loading enrollments:', error);
+      setError('Erro ao carregar matrículas: ' + error.message);
+    } finally {
+      // Loading completed
+      setLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
     if (!enrollments || enrollments.length === 0) return;
     
     let filtered = [...enrollments];
@@ -129,96 +218,6 @@ export default function RelatoriosPage() {
     }
 
     setFilteredEnrollments(filtered);
-  }, [enrollments, debouncedFilters]);
-
-  useEffect(() => {
-    if (enrollments.length > 0) {
-      applyFilters();
-    }
-  }, [applyFilters, enrollments.length]);
-
-  const loadEnrollments = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      console.log('Iniciando carregamento de matrículas...');
-      
-      // Tentar carregar do Firebase
-      try {
-        console.log('Tentando conectar ao Firebase...');
-        const q = query(collection(db, 'enrollments'), orderBy('criadoEm', 'desc'));
-        const querySnapshot = await getDocs(q);
-        
-        // Carregar dados principais e subcoleções
-        const firebaseData = await Promise.all(querySnapshot.docs.map(async (doc) => {
-          const data = doc.data();
-          
-          // Buscar primeiro responsável da subcollection
-          let primeiroResponsavel = null;
-          let primeiroTelefone = null;
-          
-          try {
-            const guardiansSnapshot = await getDocs(collection(db, 'enrollments', doc.id, 'guardians'));
-            if (!guardiansSnapshot.empty) {
-              const primeiroGuardian = guardiansSnapshot.docs[0].data();
-              primeiroResponsavel = primeiroGuardian.nome || primeiroGuardian.nomeCompleto || null;
-              primeiroTelefone = primeiroGuardian.celular || primeiroGuardian.telefone || null;
-            }
-          } catch (error) {
-            console.warn('Erro ao buscar responsáveis para matrícula', doc.id, error);
-          }
-          
-          // Normalizar campos para compatibilidade
-          const normalizedData: EnrollmentData = {
-            id: doc.id,
-            nomeCompleto: data.nomeCrianca || data.nome || data.nomeCompleto || '',
-            nomeCrianca: data.nomeCrianca,
-            nome: data.nome,
-            dataNascimento: data.dataNascimento,
-            cpf: data.cpfCrianca || data.cpf || '',
-            nomeResponsavel: primeiroResponsavel || data.responsavelNome || data.nomeResponsavel || data.nomeResponsavel1 || '',
-            responsavelNome: data.responsavelNome,
-            telefone: primeiroTelefone || data.responsavelContato || data.telefone || '',
-            responsavelContato: data.responsavelContato,
-            email: data.email,
-            endereco: data.logradouro || data.endereco || '',
-            numero: data.numero,
-            bairro: data.bairro,
-            cidade: data.municipio || data.cidade || '',
-            racaCor: data.corRaca || data.raca || data.racaCor || '',
-            raca: data.raca || data.corRaca,
-            faixaRenda: data.rendaFamiliar || data.faixaRenda || '',
-            rendaFamiliar: data.rendaFamiliar,
-            rendaPerCapita: data.rendaPerCapita,
-            numeroPessoasFamilia: data.numeroPessoasFamilia?.toString() || '',
-            situacaoHabitacional: data.tipoOcupacao || data.situacaoHabitacional || '',
-            possuiDeficiencia: data.necessidadesEspeciais ? 'sim' : 'nao',
-            necessidadesEspeciais: data.necessidadesEspeciais,
-            tipoDeficiencia: data.tipoDeficiencia || data.descricaoNecessidade,
-            serie: data.serie || '',
-            dataCadastro: data.criadoEm,
-            criadoEm: data.criadoEm,
-            status: data.status || 'pendente'
-          };
-          
-          return normalizedData;
-        }));
-        
-        console.log('Dados carregados do Firebase:', firebaseData.length, 'registros');
-        console.log('Primeiro registro:', firebaseData[0]);
-        setEnrollments(firebaseData);
-      } catch (firebaseError) {
-        console.error('Erro ao carregar do Firebase:', firebaseError);
-        setError('Erro ao carregar dados do Firebase');
-      }
-    } catch (error: any) {
-      console.error('Erro ao carregar matrículas:', error);
-      setError('Erro ao carregar matrículas: ' + error.message);
-    } finally {
-      console.log('Finalizando carregamento...');
-      setLoading(false);
-    }
   };
 
   const handleFilterChange = (field: string, value: string) => {

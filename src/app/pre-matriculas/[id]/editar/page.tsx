@@ -57,7 +57,7 @@ export default function EditPreEnrollmentPage({ params }: EditPreEnrollmentPageP
         const data = await PreEnrollmentService.getPreEnrollment(params.id)
         if (data) {
           setPreEnrollment(data)
-          // Normalizar dataNascimento para Date antes de resetar o form
+          // Normalizar dataNascimento para exibição no input (YYYY-MM-DD)
           let birthDate: Date
           const raw = data.dataNascimento as any
           if (!raw) {
@@ -72,12 +72,15 @@ export default function EditPreEnrollmentPage({ params }: EditPreEnrollmentPageP
             birthDate = new Date(raw)
           }
 
+          // Converter para string no formato YYYY-MM-DD para que o input[type=date] mostre o valor
+          const birthDateForInput = formatDateForInput(birthDate)
+
           reset({
             nomeCrianca: data.nomeCrianca,
             raca: data.raca,
             sexo: data.sexo,
-            // manter como Date para o schema; ChildInfoStep formatará para input
-            dataNascimento: birthDate,
+            // passar como string YYYY-MM-DD para o input; register converter irá transformar em Date
+            dataNascimento: birthDateForInput,
             responsavelNome: data.responsavelNome,
             responsavelContato: data.responsavelContato,
             endereco: data.endereco,
@@ -223,7 +226,7 @@ export default function EditPreEnrollmentPage({ params }: EditPreEnrollmentPageP
                 Data de Nascimento *
               </label>
               <Input
-                {...register('dataNascimento', { valueAsDate: true })}
+                {...register('dataNascimento', { setValueAs: (value) => value ? new Date(value) : undefined })}
                 type="date"
                 error={errors.dataNascimento?.message}
               />
