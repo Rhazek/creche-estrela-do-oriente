@@ -85,22 +85,20 @@ function NewEnrollmentContent() {
             // suportar ambos os formatos: `nome` ou `nomeCrianca`
             nome: (enrollment as any).nome || (enrollment as any).nomeCrianca || '',
             identidade: (enrollment as any).identidade || '',
-            // Converter para string YYYY-MM-DD para exibição correta em input[type=date]
+            // Manter como Date para schema, Input component faz a conversão para display
             dataNascimento: (() => {
               const raw = (enrollment as any).dataNascimento
-              let birthDate: Date
               if (!raw) {
-                birthDate = new Date()
+                return new Date()
               } else if (typeof raw === 'string') {
-                birthDate = new Date(raw)
+                return new Date(raw)
               } else if (raw && typeof (raw as any).toDate === 'function') {
-                birthDate = (raw as any).toDate()
+                return (raw as any).toDate()
               } else if (raw instanceof Date) {
-                birthDate = raw
+                return raw
               } else {
-                birthDate = new Date(raw as any)
+                return new Date(raw as any)
               }
-              return formatDateForInput(birthDate)
             })(),
             sexo: (enrollment as any).sexo || undefined,
             corRaca: (enrollment as any).corRaca || (enrollment as any).raca || undefined,
