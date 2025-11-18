@@ -1,7 +1,3 @@
-git clone https://github.com/Rhazek/creche-escola.git
-docker-compose -f docker-compose.dev.yml up -d
-docker-compose up -d
-git clone https://github.com/Rhazek/creche-escola.git
 # 🎓 Creche Estrela do Oriente — Sistema de Gestão
 
 Sistema de gestão escolar para creches públicas, desenvolvido com Next.js 14, TypeScript, Firebase e TailwindCSS. Pronto para desenvolvimento local, deploy em Vercel e execução com Docker.
@@ -34,8 +30,8 @@ Imagens e capturas estão em `public/` e no histórico do repositório. As image
 1. Clone o repositório:
 
 ```bash
-git clone https://github.com/Rhazek/creche-escola.git
-cd creche-escola
+git clone https://github.com/Rhazek/creche-estrela-do-oriente.git
+cd creche-estrela-do-oriente
 ```
 
 2. Instale dependências:
